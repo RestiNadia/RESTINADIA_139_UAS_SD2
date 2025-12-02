@@ -1,0 +1,77 @@
+include <iostream>
+include <vector>
+include <sstream>
+include <algorithm>
+using namespace std;
+
+struct Pelanggan {
+    string nama;
+    double berat;
+    string jenis;
+    int urutan;       
+    double waktu;     
+};
+
+int main() {
+    int n;
+    cin >> n;
+    cin.ignore();
+
+    vector<Pelanggan> data;
+    data.reserve(n);
+
+    for (int i = 0; i < n; i++) {
+        string line;
+        getline(cin, line);
+        
+        // parsing manual
+        stringstream ss(line);
+        string nama, beratStr, jenis;
+
+        getline(ss, nama, ',');
+        getline(ss, beratStr, ',');
+        getline(ss, jenis, ',');
+
+        // trimming spasi
+        auto trim = [](string &s){
+            while(!s.empty() && s.front() == ' ') s.erase(s.begin());
+            while(!s.empty() && s.back() == ' ') s.pop_back();
+        };
+
+        trim(nama);
+        trim(beratStr);
+        trim(jenis);
+
+        Pelanggan p;
+        p.nama = nama;
+        p.berat = stod(beratStr);
+        p.jenis = jenis;
+        p.urutan = i;
+
+        if (p.jenis == "regular") p.jenis = "reguler";
+        if (p.jenis.find("exp") != string::npos) p.jenis = "express";
+        if (p.jenis.find("reg") != string::npos) p.jenis = "reguler";
+
+        p.waktu = (p.jenis == "express") ? p.berat * 5 : p.berat * 10;
+
+        data.push_back(p);
+    }
+
+   
+    stable_sort(data.begin(), data.end(), [](const Pelanggan &a, const Pelanggan &b){
+        if (a.jenis == b.jenis) return a.urutan < b.urutan;
+        return a.jenis == "express";
+    });
+
+    double total = 0;
+
+    // output urutan
+    for (auto &p : data) {
+        cout << p.nama << endl;
+        total += p.waktu;
+    }
+
+    cout << "Total waktu yang dibutuhkan: " << total << " menit" << endl;
+
+    return 0;
+}
